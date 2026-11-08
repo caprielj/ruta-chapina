@@ -1,0 +1,17 @@
+# Secretos: el archivo .env NUNCA debe subirse a GitHub
+.env
+
+# Entorno virtual de Python
+backend/venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Dependencias de Node
+frontend/node_modules/
+frontend/dist/
+
+# Archivos del sistema y del editor
+.DS_Store
+Thumbs.db
+.vscode/

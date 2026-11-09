@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal, Optional
 
 from pydantic import BaseModel, EmailStr, Field
@@ -129,3 +129,69 @@ class ChatSalida(BaseModel):
     suficiente_info: bool        # False si la base de datos no tenía información suficiente
     tokens_consulta: int         # tokens gastados en esta consulta
     tokens_restantes: int        # tokens que le quedan al usuario
+
+    
+
+# ---------- Consumo de tokens ----------
+class ConsumoServicio(BaseModel):
+    servicio_id: int
+    codigo: str
+    servicio: str
+    consultas: int
+    tokens_entrada: int
+    tokens_salida: int
+    tokens_total: int
+
+
+class ConsumoDia(BaseModel):
+    fecha: date
+    consultas: int
+    tokens_entrada: int
+    tokens_salida: int
+    tokens_total: int
+
+
+class ConsumoDetalle(BaseModel):
+    id: int
+    fecha_hora: datetime      # hora de Guatemala
+    usuario_id: int
+    usuario: str
+    servicio_id: int
+    servicio: str
+    conversacion_id: Optional[int] = None
+    tokens_entrada: int
+    tokens_salida: int
+    tokens_total: int
+
+
+class ResumenConsumo(BaseModel):
+    limite_tokens: int
+    tokens_usados: int
+    tokens_restantes: int
+    consultas: int
+    por_servicio: list[ConsumoServicio]
+
+
+# ---------- Historial ----------
+class ConversacionResumen(BaseModel):
+    id: int
+    titulo: str
+    servicio_id: int
+    servicio: str
+    usuario_id: int
+    usuario: str
+    creada_en: datetime
+    mensajes: int
+    tokens_total: int
+
+
+class MensajeSalida(BaseModel):
+    id: int
+    rol: str
+    contenido: str
+    fuentes: Optional[list[Fuente]] = None
+    creado_en: datetime
+
+
+class ConversacionDetalle(ConversacionResumen):
+    lista_mensajes: list[MensajeSalida]

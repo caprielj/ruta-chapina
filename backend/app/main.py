@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from . import config, db
-from .routers import auth, chat, entidades, servicios, usuarios
+from .routers import auth, chat, entidades, reportes, servicios, usuarios
 
 app = FastAPI(
     title="Ruta Chapina API",
@@ -25,6 +25,8 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(chat.router)
 app.include_router(chat.router_rag)
+app.include_router(reportes.router_historial)
+app.include_router(reportes.router_consumo)
 app.include_router(usuarios.router)
 app.include_router(servicios.router)
 app.include_router(entidades.router_destinos)

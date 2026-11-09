@@ -195,3 +195,48 @@ class MensajeSalida(BaseModel):
 
 class ConversacionDetalle(ConversacionResumen):
     lista_mensajes: list[MensajeSalida]
+
+
+    
+
+# ---------- Agentes ----------
+class AgenteEntrada(BaseModel):
+    solicitud: str = Field(min_length=5, max_length=1500)
+
+
+class AjusteEntrada(AgenteEntrada):
+    # Id de un resultado anterior del planificador (opcional): sobre ese plan se aplica el cambio
+    plan_previo_id: Optional[int] = None
+
+
+class PasoAgente(BaseModel):
+    herramienta: str
+    argumentos: dict
+    resumen: str
+
+
+class AgenteSalida(BaseModel):
+    resultado_id: int
+    respuesta: str                       # Markdown con el itinerario
+    pasos: list[PasoAgente]              # línea de tiempo de lo que hizo el agente
+    destinos: list[dict]                 # para el mapa
+    clima: list[dict]
+    distancias: list[dict]
+    presupuesto: Optional[dict] = None
+    tokens_consulta: int
+    tokens_restantes: int
+
+
+class ResultadoAgenteResumen(BaseModel):
+    id: int
+    servicio_id: int
+    servicio: str
+    usuario_id: int
+    usuario: str
+    solicitud: str
+    creado_en: datetime
+
+
+class ResultadoAgenteDetalle(ResultadoAgenteResumen):
+    pasos: list[PasoAgente]
+    resultado: dict

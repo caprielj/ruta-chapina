@@ -105,3 +105,27 @@ class PlatilloIn(BaseModel):
 
 class PlatilloOut(PlatilloIn):
     id: int
+
+
+
+# ---------- Chatbot ----------
+class ChatEntrada(BaseModel):
+    mensaje: str = Field(min_length=1, max_length=1000)
+    # Si se omite, se abre una conversación nueva; si se envía, se continúa esa
+    conversacion_id: Optional[int] = None
+
+
+class Fuente(BaseModel):
+    tabla: str       # destinos | actividades | platillos
+    id: int
+    titulo: str
+    puntaje: float   # similitud con la pregunta (0 a 1)
+
+
+class ChatSalida(BaseModel):
+    conversacion_id: int
+    respuesta: str
+    fuentes: list[Fuente]
+    suficiente_info: bool        # False si la base de datos no tenía información suficiente
+    tokens_consulta: int         # tokens gastados en esta consulta
+    tokens_restantes: int        # tokens que le quedan al usuario

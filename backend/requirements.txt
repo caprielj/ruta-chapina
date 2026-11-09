@@ -6,3 +6,5 @@ bcrypt
 PyJWT
 python-multipart
 email-validator
+groq
+fastembed

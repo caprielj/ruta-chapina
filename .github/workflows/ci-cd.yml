@@ -1,0 +1,89 @@
+# CI/CD de Ruta Chapina
+#   1) Cada push y cada pull request ejecutan las pruebas del backend y compilan el frontend.
+#   2) Solo si TODO pasa y el push es a la rama main, se despliega (backend en Render, frontend en Vercel).
+# Si una prueba falla, el trabajo "desplegar" no se ejecuta y la versión publicada queda intacta.
+name: CI-CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ------------------------------------------------------------------
+  # 1) Pruebas automatizadas del backend (pytest)
+  # ------------------------------------------------------------------
+  pruebas-backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements-dev.txt
+
+      - name: Instalar dependencias
+        run: pip install -r requirements-dev.txt
+
+      # Las pruebas usan una BD y un modelo simulados: no necesitan secretos ni gastan tokens
+      - name: Ejecutar pytest
+        run: python -m pytest -v
+
+  # ------------------------------------------------------------------
+  # 2) El frontend debe compilar sin errores
+  # ------------------------------------------------------------------
+  compilar-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Compilar
+        run: npm run build
+
+  # ------------------------------------------------------------------
+  # 3) Despliegue: depende de los dos trabajos anteriores
+  # ------------------------------------------------------------------
+  desplegar:
+    needs: [pruebas-backend, compilar-frontend]       # si alguno falla, este NO corre
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      # Render y Vercel dan una URL secreta ("deploy hook"). Al llamarla, publican la última versión de main.
+      # Las URL se guardan en GitHub: Settings > Secrets and variables > Actions (se crean en la Fase 9).
+      - name: Desplegar backend (Render)
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "Falta el secreto RENDER_DEPLOY_HOOK: se omite el despliegue del backend."
+            exit 0
+          fi
+          curl -fsS -X POST "$HOOK"
+
+      - name: Desplegar frontend (Vercel)
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "Falta el secreto VERCEL_DEPLOY_HOOK: se omite el despliegue del frontend."
+            exit 0
+          fi
+          curl -fsS -X POST "$HOOK"

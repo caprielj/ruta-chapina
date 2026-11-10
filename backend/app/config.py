@@ -29,6 +29,8 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 # (lista vigente en https://console.groq.com/docs/models)
 GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
+
 # Modelo de embeddings: multilingüe (entiende español), produce vectores de 384 dimensiones
 EMBEDDING_MODEL = os.getenv(
     "EMBEDDING_MODEL", "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"

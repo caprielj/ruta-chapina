@@ -7,5 +7,4 @@ PyJWT
 python-multipart
 email-validator
 groq
-fastembed
 httpx
